@@ -1,19 +1,22 @@
-// vercel.json
 {
   "functions": {
-    "api/generate-apk/route.ts": {
+    "api/generate-apk.ts": {
       "maxDuration": 60,
       "memory": 1024
     },
-    "api/scan-website/route.ts": {
+    "api/scan-website.ts": {
+      "maxDuration": 30,
+      "memory": 512
+    },
+    "api/github-export.ts": {
       "maxDuration": 30,
       "memory": 512
     }
   },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "source": "/(.*)",
+      "destination": "/"
     }
   ],
   "headers": [
@@ -26,16 +29,49 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET,POST,PUT,DELETE,OPTIONS"
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
+          "value": "Content-Type, Authorization, X-Requested-With"
+        },
+        {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.(apk|zip))",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
   ],
-  "buildCommand": "next build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install"
+  "redirects": [
+    {
+      "source": "/builder",
+      "destination": "/app/builder",
+      "permanent": true
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/app/dashboard",
+      "permanent": true
+    }
+  ],
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_VERCEL_URL": "@next_public_vercel_url"
+    }
+  },
+  "regions": ["sin1", "iad1"],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "github": {
+    "silent": true
+  }
 }
